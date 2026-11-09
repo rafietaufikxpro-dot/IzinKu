@@ -21,9 +21,12 @@ class SiswaFactory extends Factory
     public function definition(): array
     {
         return [
-            'nama' => fake()->name(),
-            'kelas' => 'XII RPL 1',
             'user_id' => User::factory(),
+            'nis' => fake()->unique()->numerify('#####'),
+            'nisn' => fake()->unique()->numerify('##########'),
+            'nama' => fake()->name(),
+            'kelas' => fake()->randomElement(['X-A', 'X-B', 'XI-RPL-1', 'XI-RPL-2', 'XII-TKJ']),
+            'jenis_kelamin' => fake()->randomElement(['L', 'P']),
         ];
     }
 }

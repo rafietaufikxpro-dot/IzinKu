@@ -13,20 +13,18 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    // Form & Pengajuan Izin Siswa (Task 3 & 5 / FR-04 & FR-06)
+    Route::get('/izin/buat', [IzinController::class, 'create'])->name('izin.create');
+    Route::post('/izin', [IzinController::class, 'store'])->name('izin.store');
+
+    // Riwayat & detail izin untuk wali murid (Task 4)
+    Route::get('/izin', [IzinController::class, 'index'])->name('izin.index');
+    Route::get('/izin/{izin}', [IzinController::class, 'show'])->name('izin.show');
+    Route::get('/izin/{izin}/surat-sakit', [IzinController::class, 'downloadSuratSakit'])->name('izin.surat-sakit.download');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-Route::middleware(['auth', 'role:wali_murid'])->group(function () {
-    Route::get('/izin', [IzinController::class, 'index'])->name('izin.index');
-    Route::get('/izin/create', [IzinController::class, 'create'])->name('izin.create');
-    Route::post('/izin', [IzinController::class, 'store'])->name('izin.store');
-});
-
-Route::middleware('auth')->group(function () {
-    Route::get('/izin/{izin}', [IzinController::class, 'show'])->name('izin.show');
-    Route::get('/izin/{izin}/surat-sakit', [IzinController::class, 'downloadSuratSakit'])->name('izin.surat-sakit.download');
 });
 
 require __DIR__.'/auth.php';

@@ -21,20 +21,48 @@ class IzinFactory extends Factory
      */
     public function definition(): array
     {
+        $startDate = now()->addDay();
+        $endDate = (clone $startDate)->addDays(1);
+
         return [
-            'siswa_id' => Siswa::factory(),
             'user_id' => User::factory(),
-            'alasan' => 'sakit',
-            'tanggal_mulai' => now()->toDateString(),
-            'tanggal_selesai' => now()->toDateString(),
-            'surat_sakit_path' => null,
+            'siswa_id' => Siswa::factory(),
+            'jenis_izin' => 'izin',
+            'tanggal_mulai' => $startDate->toDateString(),
+            'tanggal_selesai' => $endDate->toDateString(),
+            'jumlah_hari' => 2,
+            'alasan' => fake()->sentence(),
+            'surat_sakit' => null,
+            'status_konfirmasi' => 'menunggu',
             'status' => 'menunggu',
-            'alasan_penolakan' => null,
-            'catatan' => null,
-            'confirmed_at' => null,
-            'confirmed_by' => null,
-            'status_updated_at' => null,
-            'status_updated_by' => null,
+            'catatan_penolakan' => null,
+            'diverifikasi_oleh' => null,
+            'diverifikasi_pada' => null,
+            'dikonfirmasi_oleh' => null,
+            'dikonfirmasi_pada' => null,
         ];
+    }
+
+    /**
+     * State untuk izin jenis sakit.
+     */
+    public function sakit(): static
+    {
+        return $this->state(fn () => [
+            'jenis_izin' => 'sakit',
+            'surat_sakit' => 'surat_sakit/dummy.pdf',
+        ]);
+    }
+
+    /**
+     * State untuk izin yang sudah dikonfirmasi wali murid.
+     */
+    public function dikonfirmasi(): static
+    {
+        return $this->state(fn () => [
+            'status_konfirmasi' => 'dikonfirmasi',
+            'dikonfirmasi_oleh' => User::factory(),
+            'dikonfirmasi_pada' => now(),
+        ]);
     }
 }

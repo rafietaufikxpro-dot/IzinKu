@@ -4,18 +4,48 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreIzinRequest;
 use App\Models\Izin;
-use App\Models\Siswa;
 use App\Services\IzinService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class IzinController extends Controller
 {
-    public function __construct(
-        private readonly IzinService $izinService,
-    ) {}
+    /**
+     * Tampilkan form pengajuan izin siswa (Task 3 / FR-04).
+     */
+    public function create(Request $request, IzinService $izinService): View
+    {
+        $user = $request->user();
+        $siswas = $izinService->getSiswaForWali($user);
+        $maxDays = $izinService->getMaxDurationDays();
+
+        return view('FormIzinSiswa.index', [
+            'siswas' => $siswas,
+            'maxDays' => $maxDays,
+        ]);
+    }
 
     /**
-     * Daftar izin yang diajukan wali murid.
+     * Proses penyimpanan data pengajuan izin siswa (Task 3 & 5 / FR-04 & FR-06).
+     */
+    public function store(StoreIzinRequest $request, IzinService $izinService): RedirectResponse
+    {
+        $izin = $izinService->createIzin(
+            user: $request->user(),
+            data: $request->validated(),
+            suratSakit: $request->file('surat_sakit')
+        );
+
+        return redirect()->route('izin.create')->with(
+            'success',
+            "Pengajuan izin untuk {$izin->siswa->nama} berhasil disimpan! Status: Menunggu Konfirmasi."
+        );
+    }
+
+    /**
+     * Daftar izin yang diajukan wali murid (Task 4).
      */
     public function index()
     {
@@ -28,35 +58,7 @@ class IzinController extends Controller
     }
 
     /**
-     * Form pengajuan izin.
-     */
-    public function create()
-    {
-        $siswa = Siswa::where('user_id', auth()->id())
-            ->orderBy('nama')
-            ->get();
-
-        return view('izin.create', compact('siswa'));
-    }
-
-    /**
-     * Simpan pengajuan izin baru.
-     */
-    public function store(StoreIzinRequest $request)
-    {
-        $izin = $this->izinService->buatIzin(
-            $request->user(),
-            $request->validated(),
-            $request->file('surat_sakit'),
-        );
-
-        return redirect()
-            ->route('izin.show', $izin)
-            ->with('success', 'Pengajuan izin berhasil dibuat dan menunggu konfirmasi.');
-    }
-
-    /**
-     * Detail pengajuan izin.
+     * Detail pengajuan izin (Task 4).
      */
     public function show(Izin $izin)
     {
@@ -66,14 +68,14 @@ class IzinController extends Controller
     }
 
     /**
-     * Unduh berkas surat sakit.
+     * Unduh berkas surat sakit (Task 4).
      */
     public function downloadSuratSakit(Izin $izin)
     {
         $this->authorize('view', $izin);
 
-        abort_if($izin->surat_sakit_path === null, 404);
+        abort_if($izin->surat_sakit === null, 404);
 
-        return Storage::disk('surat_sakit')->download($izin->surat_sakit_path);
+        return Storage::disk(config('izin.surat_sakit.disk', 'local'))->download($izin->surat_sakit);
     }
 }
