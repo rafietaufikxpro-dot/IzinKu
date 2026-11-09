@@ -56,8 +56,8 @@ class VerifikasiAccTest extends TestCase
         $izin->refresh();
 
         $this->assertSame('disetujui', $izin->status);
-        $this->assertSame($piket->id, $izin->status_updated_by);
-        $this->assertNotNull($izin->status_updated_at);
+        $this->assertSame($piket->id, $izin->diverifikasi_oleh);
+        $this->assertNotNull($izin->diverifikasi_pada);
     }
 
     public function test_guru_piket_dapat_menolak_izin_dengan_alasan(): void
@@ -68,7 +68,7 @@ class VerifikasiAccTest extends TestCase
 
         $response = $this->actingAs($piket)->post(route('izin-verifikasi.acc', $izin), [
             'aksi' => 'ditolak',
-            'alasan_penolakan' => 'Dokumen tidak lengkap.',
+            'catatan_penolakan' => 'Dokumen tidak lengkap.',
         ]);
 
         $response->assertRedirect();
@@ -76,9 +76,9 @@ class VerifikasiAccTest extends TestCase
         $izin->refresh();
 
         $this->assertSame('ditolak', $izin->status);
-        $this->assertSame('Dokumen tidak lengkap.', $izin->alasan_penolakan);
-        $this->assertSame($piket->id, $izin->status_updated_by);
-        $this->assertNotNull($izin->status_updated_at);
+        $this->assertSame('Dokumen tidak lengkap.', $izin->catatan_penolakan);
+        $this->assertSame($piket->id, $izin->diverifikasi_oleh);
+        $this->assertNotNull($izin->diverifikasi_pada);
     }
 
     public function test_penolakan_wajib_menyertakan_alasan(): void
@@ -91,7 +91,7 @@ class VerifikasiAccTest extends TestCase
             'aksi' => 'ditolak',
         ]);
 
-        $response->assertSessionHasErrors('alasan_penolakan');
+        $response->assertSessionHasErrors('catatan_penolakan');
         $this->assertSame('menunggu', $izin->fresh()->status);
     }
 
@@ -99,7 +99,7 @@ class VerifikasiAccTest extends TestCase
     {
         $piket = User::factory()->create();
         $piket->assignRole('guru_piket');
-        $izin = Izin::factory()->create(['confirmed_at' => null]);
+        $izin = Izin::factory()->create(['status_konfirmasi' => 'menunggu']);
 
         $response = $this->actingAs($piket)->post(route('izin-verifikasi.acc', $izin), [
             'aksi' => 'disetujui',
@@ -117,7 +117,7 @@ class VerifikasiAccTest extends TestCase
 
         $response = $this->actingAs($piket)->post(route('izin-verifikasi.acc', $izin), [
             'aksi' => 'ditolak',
-            'alasan_penolakan' => 'Uji coba',
+            'catatan_penolakan' => 'Uji coba',
         ]);
 
         $response->assertSessionHasErrors('izin');

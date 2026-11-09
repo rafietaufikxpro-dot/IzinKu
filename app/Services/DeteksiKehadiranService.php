@@ -31,7 +31,7 @@ class DeteksiKehadiranService
 
         return Siswa::query()
             ->whereNotIn('id', $siswaSudahFingerprint)
-            ->whereDoesntHave('izin', function (Builder $query) use ($tanggalString) {
+            ->whereDoesntHave('izins', function (Builder $query) use ($tanggalString) {
                 $query->where('status', 'disetujui')
                     ->whereDate('tanggal_mulai', '<=', $tanggalString)
                     ->whereDate('tanggal_selesai', '>=', $tanggalString);

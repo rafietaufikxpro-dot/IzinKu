@@ -9,4 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('kehadiran:deteksi-belum-fingerprint')
-    ->dailyAt(config('izinku.batas_waktu_fingerprint', '07:00'));
+    ->dailyAt(config('izin.batas_waktu_fingerprint', '07:00'));

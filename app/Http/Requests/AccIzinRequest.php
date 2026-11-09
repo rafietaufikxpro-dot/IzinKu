@@ -23,7 +23,7 @@ class AccIzinRequest extends FormRequest
     {
         return [
             'aksi' => ['required', 'in:disetujui,ditolak'],
-            'alasan_penolakan' => ['required_if:aksi,ditolak', 'nullable', 'string', 'max:1000'],
+            'catatan_penolakan' => ['required_if:aksi,ditolak', 'nullable', 'string', 'max:1000'],
         ];
     }
 
@@ -35,7 +35,7 @@ class AccIzinRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'alasan_penolakan.required_if' => 'Alasan penolakan wajib diisi.',
+            'catatan_penolakan.required_if' => 'Alasan penolakan wajib diisi.',
         ];
     }
 }

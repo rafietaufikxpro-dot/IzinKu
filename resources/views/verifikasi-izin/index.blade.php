@@ -34,7 +34,7 @@
                                         @endphp
                                         <tr>
                                             <td class="py-2 pr-4">{{ $item->siswa?->nama }}</td>
-                                            <td class="py-2 pr-4">{{ __($item->alasan) }}</td>
+                                            <td class="py-2 pr-4">{{ __($item->jenis_izin) }}</td>
                                             <td class="py-2 pr-4">{{ $item->tanggal_mulai?->format('d M Y') }} - {{ $item->tanggal_selesai?->format('d M Y') }}</td>
                                             <td class="py-2 pr-4">
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $badge }}">

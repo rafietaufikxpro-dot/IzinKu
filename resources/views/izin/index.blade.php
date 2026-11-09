@@ -32,7 +32,7 @@
                                     <div>
                                         <p class="font-medium text-gray-900">{{ $item->siswa?->nama }}</p>
                                         <p class="text-sm text-gray-500">
-                                            {{ __($item->alasan) }} &middot;
+                                            {{ __($item->jenis_izin) }} &middot;
                                             {{ $item->tanggal_mulai?->format('d M Y') }} - {{ $item->tanggal_selesai?->format('d M Y') }}
                                         </p>
                                     </div>

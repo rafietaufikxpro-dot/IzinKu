@@ -47,7 +47,7 @@ class IzinVerifikasiController extends Controller
             $request->user(),
             $izin,
             $request->validated('aksi'),
-            $request->validated('alasan_penolakan'),
+            $request->validated('catatan_penolakan'),
         );
 
         return redirect()
