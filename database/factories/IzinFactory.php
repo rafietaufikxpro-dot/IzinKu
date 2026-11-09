@@ -38,6 +38,8 @@ class IzinFactory extends Factory
             'catatan_penolakan' => null,
             'diverifikasi_oleh' => null,
             'diverifikasi_pada' => null,
+            'dikonfirmasi_oleh' => null,
+            'dikonfirmasi_pada' => null,
         ];
     }
 
@@ -49,6 +51,18 @@ class IzinFactory extends Factory
         return $this->state(fn () => [
             'jenis_izin' => 'sakit',
             'surat_sakit' => 'surat_sakit/dummy.pdf',
+        ]);
+    }
+
+    /**
+     * State untuk izin yang sudah dikonfirmasi wali murid.
+     */
+    public function dikonfirmasi(): static
+    {
+        return $this->state(fn () => [
+            'status_konfirmasi' => 'dikonfirmasi',
+            'dikonfirmasi_oleh' => User::factory(),
+            'dikonfirmasi_pada' => now(),
         ]);
     }
 }

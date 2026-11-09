@@ -34,4 +34,22 @@ return [
     */
     'allow_retroactive' => (bool) env('IZIN_ALLOW_RETROACTIVE', false),
     'max_past_days' => (int) env('IZIN_MAX_PAST_DAYS', 0),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Aturan Bisnis Penunjang
+    |--------------------------------------------------------------------------
+    */
+
+    // Batas ketidakhadiran berturut-turut sebelum peringatan (hari).
+    'ketidakhadiran_maksimal_hari' => 2,
+
+    // Definisi "lebih dari 2 hari": "kalender" atau "sekolah".
+    'definisi_hari_ketidakhadiran' => 'kalender',
+
+    // Role yang berwenang memberi ACC (persetujuan) izin.
+    'role_pemberi_acc' => ['guru_piket'],
+
+    // Batas waktu fingerprint dianggap hadir (HH:MM).
+    'batas_waktu_fingerprint' => '07:00',
 ];

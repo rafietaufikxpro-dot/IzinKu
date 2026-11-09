@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreIzinRequest;
+use App\Models\Izin;
 use App\Services\IzinService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class IzinController extends Controller
@@ -40,5 +42,40 @@ class IzinController extends Controller
             'success',
             "Pengajuan izin untuk {$izin->siswa->nama} berhasil disimpan! Status: Menunggu Konfirmasi."
         );
+    }
+
+    /**
+     * Daftar izin yang diajukan wali murid (Task 4).
+     */
+    public function index()
+    {
+        $izin = Izin::with('siswa')
+            ->where('user_id', auth()->id())
+            ->latest()
+            ->paginate(10);
+
+        return view('izin.index', compact('izin'));
+    }
+
+    /**
+     * Detail pengajuan izin (Task 4).
+     */
+    public function show(Izin $izin)
+    {
+        $this->authorize('view', $izin);
+
+        return view('izin.show', compact('izin'));
+    }
+
+    /**
+     * Unduh berkas surat sakit (Task 4).
+     */
+    public function downloadSuratSakit(Izin $izin)
+    {
+        $this->authorize('view', $izin);
+
+        abort_if($izin->surat_sakit === null, 404);
+
+        return Storage::disk(config('izin.surat_sakit.disk', 'local'))->download($izin->surat_sakit);
     }
 }

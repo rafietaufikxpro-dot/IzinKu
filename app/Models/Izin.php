@@ -38,6 +38,8 @@ class Izin extends Model
         'catatan_penolakan',
         'diverifikasi_oleh',
         'diverifikasi_pada',
+        'dikonfirmasi_oleh',
+        'dikonfirmasi_pada',
     ];
 
     /**
@@ -52,6 +54,7 @@ class Izin extends Model
             'tanggal_selesai' => 'date',
             'jumlah_hari' => 'integer',
             'diverifikasi_pada' => 'datetime',
+            'dikonfirmasi_pada' => 'datetime',
         ];
     }
 
@@ -83,6 +86,16 @@ class Izin extends Model
     public function verifikator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'diverifikasi_oleh');
+    }
+
+    /**
+     * Relasi ke wali murid yang mengonfirmasi.
+     *
+     * @return BelongsTo<User, Izin>
+     */
+    public function pengonfirmasi(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dikonfirmasi_oleh');
     }
 
     /**
