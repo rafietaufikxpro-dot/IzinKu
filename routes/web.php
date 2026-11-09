@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\IzinController;
+use App\Http\Controllers\IzinVerifikasiController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::middleware('auth')->group(function () {
+    // Verifikasi & ACC izin guru piket (Task 7 / FR-08 & FR-09)
+    Route::get('/verifikasi-izin', [IzinVerifikasiController::class, 'index'])->name('izin-verifikasi.index');
+    Route::get('/verifikasi-izin/{izin}', [IzinVerifikasiController::class, 'show'])->name('izin-verifikasi.show');
+    Route::post('/verifikasi-izin/{izin}/acc', [IzinVerifikasiController::class, 'acc'])->name('izin-verifikasi.acc');
 });
 
 require __DIR__.'/auth.php';
