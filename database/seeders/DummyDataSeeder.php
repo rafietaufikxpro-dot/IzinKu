@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Fingerprint;
 use App\Models\Izin;
 use App\Models\Siswa;
 use App\Models\User;
@@ -79,6 +80,43 @@ class DummyDataSeeder extends Seeder
                 'catatan' => 'Izin dummy untuk demo verifikasi.',
                 'confirmed_at' => now(),
                 'confirmed_by' => $wali->id,
+            ],
+        );
+
+        // Data dummy untuk deteksi kehadiran (Task 8).
+        $siswaHadir = Siswa::firstOrCreate(
+            ['nama' => 'Siswa Dummy Hadir'],
+            ['kelas' => 'XII RPL 1', 'user_id' => $wali->id],
+        );
+        Fingerprint::firstOrCreate(
+            ['siswa_id' => $siswaHadir->id, 'tanggal' => today()->toDateString()],
+            ['waktu' => '06:45:00'],
+        );
+
+        Siswa::firstOrCreate(
+            ['nama' => 'Siswa Dummy Tidak Hadir'],
+            ['kelas' => 'XII RPL 1', 'user_id' => $wali->id],
+        );
+
+        $siswaIzin = Siswa::firstOrCreate(
+            ['nama' => 'Siswa Dummy Izin Disetujui'],
+            ['kelas' => 'XII RPL 1', 'user_id' => $wali->id],
+        );
+        Izin::firstOrCreate(
+            [
+                'siswa_id' => $siswaIzin->id,
+                'alasan' => 'izin',
+                'tanggal_mulai' => now()->toDateString(),
+            ],
+            [
+                'user_id' => $wali->id,
+                'tanggal_selesai' => now()->toDateString(),
+                'status' => 'disetujui',
+                'catatan' => 'Izin dummy disetujui untuk demo deteksi.',
+                'confirmed_at' => now(),
+                'confirmed_by' => $wali->id,
+                'status_updated_at' => now(),
+                'status_updated_by' => $piket->id,
             ],
         );
     }

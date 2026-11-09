@@ -18,6 +18,9 @@ return [
     // Batas ketidakhadiran berturut-turut sebelum peringatan (hari).
     'ketidakhadiran_maksimal_hari' => 2,
 
+    // Batas waktu fingerprint dianggap hadir (HH:MM).
+    'batas_waktu_fingerprint' => '07:00',
+
     // Definisi "lebih dari 2 hari": "kalender" atau "sekolah".
     'definisi_hari_ketidakhadiran' => 'kalender',
 
