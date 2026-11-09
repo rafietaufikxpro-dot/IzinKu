@@ -38,6 +38,15 @@ return [
             'report' => false,
         ],
 
+        // Disk khusus surat sakit: privat, tidak bisa diakses lewat URL publik.
+        'surat_sakit' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private'),
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

@@ -15,6 +15,12 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    @if (auth()->user()?->hasRole('wali_murid'))
+                        <x-nav-link :href="route('izin.index')" :active="request()->routeIs('izin.*')">
+                            {{ __('Pengajuan Izin') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -70,6 +76,12 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            @if (auth()->user()?->hasRole('wali_murid'))
+                <x-responsive-nav-link :href="route('izin.index')" :active="request()->routeIs('izin.*')">
+                    {{ __('Pengajuan Izin') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
