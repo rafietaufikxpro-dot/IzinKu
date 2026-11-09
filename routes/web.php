@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\IzinController;
 use App\Http\Controllers\IzinVerifikasiController;
+use App\Http\Controllers\KehadiranController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/verifikasi-izin', [IzinVerifikasiController::class, 'index'])->name('izin-verifikasi.index');
     Route::get('/verifikasi-izin/{izin}', [IzinVerifikasiController::class, 'show'])->name('izin-verifikasi.show');
     Route::post('/verifikasi-izin/{izin}/acc', [IzinVerifikasiController::class, 'acc'])->name('izin-verifikasi.acc');
+});
+
+Route::middleware(['auth', 'role:guru|guru_piket|admin'])->group(function () {
+    // Deteksi siswa belum fingerprint (Task 8 / FR-11)
+    Route::get('/kehadiran/belum-fingerprint', [KehadiranController::class, 'belumFingerprint'])
+        ->name('kehadiran.belum-fingerprint');
 });
 
 require __DIR__.'/auth.php';

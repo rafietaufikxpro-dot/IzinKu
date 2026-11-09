@@ -28,6 +28,9 @@
                         <x-nav-link :href="route('izin-verifikasi.index')" :active="request()->routeIs('izin-verifikasi.*')">
                             {{ __('Verifikasi Izin') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('kehadiran.belum-fingerprint')" :active="request()->routeIs('kehadiran.*')">
+                            {{ __('Belum Fingerprint') }}
+                        </x-nav-link>
                     @endif
                 </div>
             </div>
@@ -96,6 +99,9 @@
             @if (auth()->user()?->hasAnyRole(['guru', 'guru_piket', 'admin']))
                 <x-responsive-nav-link :href="route('izin-verifikasi.index')" :active="request()->routeIs('izin-verifikasi.*')">
                     {{ __('Verifikasi Izin') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('kehadiran.belum-fingerprint')" :active="request()->routeIs('kehadiran.*')">
+                    {{ __('Belum Fingerprint') }}
                 </x-responsive-nav-link>
             @endif
         </div>

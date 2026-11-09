@@ -43,7 +43,7 @@
                         </div>
                         <div>
                             <dt class="text-sm font-medium text-gray-500">{{ __('Alasan') }}</dt>
-                            <dd class="text-gray-900">{{ __($izin->alasan) }}</dd>
+                            <dd class="text-gray-900">{{ __($izin->jenis_izin) }}</dd>
                         </div>
                         <div>
                             <dt class="text-sm font-medium text-gray-500">{{ __('Tanggal Mulai') }}</dt>
@@ -56,31 +56,31 @@
                         <div>
                             <dt class="text-sm font-medium text-gray-500">{{ __('Konfirmasi Wali Murid') }}</dt>
                             <dd class="text-gray-900">
-                                @if ($izin->confirmed_at)
-                                    {{ $izin->confirmed_at->format('d M Y H:i') }}
-                                    @if ($izin->confirmedBy)
-                                        &middot; {{ $izin->confirmedBy->name }}
+                                @if ($izin->status_konfirmasi === 'dikonfirmasi')
+                                    {{ $izin->dikonfirmasi_pada?->format('d M Y H:i') }}
+                                    @if ($izin->pengonfirmasi)
+                                        &middot; {{ $izin->pengonfirmasi->name }}
                                     @endif
                                 @else
                                     <span class="text-yellow-700">{{ __('Belum dikonfirmasi') }}</span>
                                 @endif
                             </dd>
                         </div>
-                        @if ($izin->catatan)
+                        @if ($izin->alasan)
                             <div class="sm:col-span-2">
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Keterangan') }}</dt>
-                                <dd class="text-gray-900">{{ $izin->catatan }}</dd>
+                                <dd class="text-gray-900">{{ $izin->alasan }}</dd>
                             </div>
                         @endif
-                        @if ($izin->alasan_penolakan)
+                        @if ($izin->catatan_penolakan)
                             <div class="sm:col-span-2">
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Alasan Penolakan') }}</dt>
-                                <dd class="text-gray-900">{{ $izin->alasan_penolakan }}</dd>
+                                <dd class="text-gray-900">{{ $izin->catatan_penolakan }}</dd>
                             </div>
                         @endif
                     </dl>
 
-                    @if ($izin->surat_sakit_path)
+                    @if ($izin->surat_sakit)
                         <div>
                             <a href="{{ route('izin.surat-sakit.download', $izin) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 {{ __('Unduh Surat Sakit') }}
@@ -89,7 +89,7 @@
                     @endif
 
                     @if ($izin->status === 'menunggu')
-                        @if ($izin->confirmed_at)
+                        @if ($izin->status_konfirmasi === 'dikonfirmasi')
                             <form method="POST" action="{{ route('izin-verifikasi.acc', $izin) }}" class="space-y-4 border-t border-gray-200 pt-4" x-data="{ aksi: 'disetujui' }">
                                 @csrf
 
@@ -107,9 +107,9 @@
                                 </div>
 
                                 <div x-show="aksi === 'ditolak'" x-cloak>
-                                    <x-input-label for="alasan_penolakan" :value="__('Alasan Penolakan')" />
-                                    <textarea id="alasan_penolakan" name="alasan_penolakan" rows="3" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('alasan_penolakan') }}</textarea>
-                                    <x-input-error :messages="$errors->get('alasan_penolakan')" class="mt-2" />
+                                    <x-input-label for="catatan_penolakan" :value="__('Alasan Penolakan')" />
+                                    <textarea id="catatan_penolakan" name="catatan_penolakan" rows="3" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('catatan_penolakan') }}</textarea>
+                                    <x-input-error :messages="$errors->get('catatan_penolakan')" class="mt-2" />
                                 </div>
 
                                 <x-primary-button>{{ __('Simpan') }}</x-primary-button>
@@ -122,10 +122,10 @@
                     @else
                         <div class="bg-gray-50 border border-gray-200 text-gray-700 rounded-md p-3 text-sm">
                             {{ __('Izin sudah diproses.') }}
-                            @if ($izin->status_updated_at)
-                                &middot; {{ $izin->status_updated_at->format('d M Y H:i') }}
-                                @if ($izin->pengubahStatus)
-                                    &middot; {{ $izin->pengubahStatus->name }}
+                            @if ($izin->diverifikasi_pada)
+                                &middot; {{ $izin->diverifikasi_pada->format('d M Y H:i') }}
+                                @if ($izin->verifikator)
+                                    &middot; {{ $izin->verifikator->name }}
                                 @endif
                             @endif
                         </div>
