@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -15,11 +16,28 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $wali = User::factory()->create([
+            'name' => 'Wali Murid Demo',
+            'email' => 'wali@example.com',
+            'password' => bcrypt('password'),
+        ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        Siswa::create([
+            'user_id' => $wali->id,
+            'nis' => '10291',
+            'nisn' => '0081234567',
+            'nama' => 'Ahmad Fauzi',
+            'kelas' => 'XI-RPL-1',
+            'jenis_kelamin' => 'L',
+        ]);
+
+        Siswa::create([
+            'user_id' => $wali->id,
+            'nis' => '10292',
+            'nisn' => '0081234568',
+            'nama' => 'Siti Nurhaliza',
+            'kelas' => 'X-A',
+            'jenis_kelamin' => 'P',
         ]);
     }
 }
