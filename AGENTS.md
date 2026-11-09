@@ -1,158 +1,126 @@
-<laravel-boost-guidelines>
-=== foundation rules ===
+# AGENTS.md — Panduan untuk AI Coding Agent (IzinKu)
 
-# Laravel Boost Guidelines
+File ini berisi konteks dan aturan yang harus diikuti agent (Claude Code, Copilot, Cursor, dll.) saat bekerja di repo ini. Baca juga `COLLABORATORS.md` untuk aturan tim dan PRD untuk detail kebutuhan.
 
-## Foundational Context
+## Ringkasan Proyek
 
-This application is a Laravel application running on PHP 8.5. Always use the APIs that match the installed major version of each package — do not assume a version.
+**IzinKu** adalah sistem informasi berbasis web untuk perizinan dan monitoring kehadiran siswa.
 
-Before relying on a package's API, confirm its installed version:
-- PHP packages: run `composer show --direct` to list direct dependencies with versions, or `composer show <vendor/package>` for a single package.
-- JS packages: check `package.json` for the installed versions.
+- Wali murid mengajukan izin (termasuk unggah surat sakit) dan mengonfirmasinya lewat WhatsApp.
+- Guru piket memeriksa dan menyetujui/menolak (ACC).
+- Sistem mendeteksi siswa yang belum fingerprint setelah pukul 07.00 dan siswa yang tidak hadir lebih dari 2 hari.
+- Guru, wali murid, dan admin melihat riwayat; admin dan guru melihat rekap dengan filter.
 
-## Skills Activation
+Metode pengembangan: Agile/Scrum. Bahasa antarmuka dan teks pengguna: **Bahasa Indonesia**.
 
-This project has domain-specific skills available in `**/skills/**`. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
+## Tech Stack
 
-## Conventions
+- Laravel (PHP 8.2+), MySQL/MariaDB
+- Laravel Breeze (Blade) + Tailwind CSS + Alpine.js
+- `spatie/laravel-permission` untuk role dan permission
+- Laravel Queue (notifikasi) dan Scheduler (tugas terjadwal)
+- Gateway WhatsApp pihak ketiga (belum ditentukan; panggil lewat HTTP client Laravel)
+- Laporan: `maatwebsite/excel` dan `barryvdh/laravel-dompdf` (jika dipakai)
 
-- You must follow all existing code conventions used in this application. When creating or editing a file, check sibling files for the correct structure, approach, and naming.
-- Use descriptive names for variables and methods. For example, `isRegisteredForDiscounts`, not `discount()`.
-- Check for existing components to reuse before writing a new one.
+Cek `composer.json` dan `package.json` untuk versi pasti sebelum menulis kode. Jangan menambah paket baru tanpa persetujuan tim.
 
-## Verification Scripts
+## Perintah Umum
 
-- Do not create verification scripts or tinker when tests cover that functionality and prove they work. Unit and feature tests are more important.
+```bash
+composer install
+cp .env.example .env && php artisan key:generate
+php artisan migrate:fresh --seed     # reset database dengan data dummy
+php artisan storage:link
+npm install && npm run dev           # frontend (terminal terpisah)
+php artisan serve
+php artisan test                     # jalankan tes
+php artisan schedule:work            # uji tugas terjadwal secara lokal
+php artisan queue:work               # uji antrean notifikasi
+./vendor/bin/pint                    # format kode (jika Pint terpasang)
+```
 
-## Application Structure & Architecture
+## Peran Pengguna (Role)
 
-- Stick to existing directory structure; don't create new base folders without approval.
-- Do not change the application's dependencies without approval.
+| Role | Hak akses |
+|---|---|
+| `wali_murid` | Login dengan nomor WhatsApp; ajukan dan konfirmasi izin anaknya; lihat riwayat dan feedback anaknya saja |
+| `guru` | Login; pantau perizinan dan kehadiran; lihat siswa belum hadir; beri feedback; lihat riwayat |
+| `guru_piket` | Seperti guru, ditambah memeriksa, menyetujui (ACC), atau menolak izin |
+| `admin` | Kelola akun wali murid, guru, dan data siswa; lihat laporan rekap |
 
-## Frontend Bundling
+Aturan: wali murid **tidak boleh** melihat atau mengubah data siswa yang bukan anaknya. Selalu terapkan pengecekan role dan kepemilikan data lewat middleware, policy, atau gate. Jangan hanya menyembunyikan menu di tampilan.
 
-- If a frontend change doesn't show in the UI or you get a "Unable to locate file in Vite manifest" error, run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
+## Aturan Bisnis (wajib dipatuhi)
 
-## Documentation Files
+1. Nomor WhatsApp adalah identitas unik akun wali murid dan saluran notifikasi.
+2. Izin karena **sakit wajib** melampirkan surat sakit; pengajuan tanpa dokumen ditolak.
+3. Durasi/tanggal izin dibatasi sesuai aturan sekolah; sistem menolak atau memberi peringatan jika melewati batas. Batas maksimal disimpan sebagai konfigurasi, bukan angka yang ditulis langsung di banyak tempat.
+4. Izin **belum boleh diproses** guru sebelum dikonfirmasi wali murid.
+5. Status ACC hanya: `menunggu`, `disetujui`, `ditolak`. Penolakan disertai alasan. Setiap perubahan status mencatat siapa dan kapan.
+6. Siswa yang belum fingerprint setelah 07.00 dianggap belum hadir, kecuali punya izin berstatus `disetujui`.
+7. Ketidakhadiran lebih dari 2 hari berturut-turut memicu peringatan ke guru dan notifikasi ke wali murid.
 
-- You must only create documentation files if explicitly requested by the user.
+## Pemetaan Kebutuhan (PRD)
 
-=== boost rules ===
+| ID | Fitur | Task Sprint 1 |
+|---|---|---|
+| FR-01 | Login nomor WhatsApp (wali murid) | Task 1 |
+| FR-02 | Login guru/admin berdasarkan role | Task 2 |
+| FR-03 | Kelola akun dan data siswa (admin) | belum ada penanggung jawab |
+| FR-04 | Form pengajuan izin | Task 3 |
+| FR-05 | Upload dan validasi surat sakit | Task 4 |
+| FR-06 | Aturan batas durasi izin | Task 5 |
+| FR-07 | Konfirmasi izin oleh wali murid | Task 6 |
+| FR-08, FR-09 | Verifikasi dan ACC izin guru piket | Task 7 |
+| FR-10 | Feedback guru | Sprint berikutnya |
+| FR-11 | Deteksi belum fingerprint setelah 07.00 | Task 8 |
+| FR-12, FR-13 | Peringatan absen > 2 hari dan notifikasi WhatsApp | Task 9 |
+| FR-14, FR-15 | Riwayat dan rekap perizinan | Task 10 |
 
-# Laravel Boost
+Saat diminta mengerjakan task, cocokkan dengan ID di atas dan penuhi kriteria penerimaan di PRD.
 
-## Tools
+## Konvensi Kode
 
-- Laravel Boost is an MCP server with tools designed specifically for this application. Prefer Boost tools over manual alternatives like shell commands or file reads.
-- Use `database-query` to run read-only queries against the database instead of writing raw SQL in tinker.
-- Use `database-schema` to inspect table structure before writing migrations or models.
-- Use `get-absolute-url` to resolve the correct scheme, domain, and port for project URLs. Always use this before sharing a URL with the user.
-- Use `browser-logs` to read browser logs, errors, and exceptions. Only recent logs are useful, ignore old entries.
+- Ikuti gaya Laravel dan PSR-12; format dengan Pint jika tersedia.
+- Nama class, method, dan variabel dalam **Bahasa Inggris**; teks yang tampil ke pengguna, pesan validasi, dan notifikasi dalam **Bahasa Indonesia**.
+- Gunakan Eloquent, migrasi, dan seeder. Hindari query mentah kecuali perlu.
+- Validasi lewat Form Request, bukan di dalam controller.
+- Logika bisnis (misalnya aturan durasi izin, deteksi absen) ditaruh di class Service/Action, bukan di controller atau view.
+- Tugas terjadwal (deteksi 07.00, absen > 2 hari) didaftarkan di Scheduler; pengiriman notifikasi lewat Queue dengan pencatatan status kirim dan retry.
+- Unggahan surat sakit disimpan di disk privat, bukan di folder publik, dan hanya bisa diakses pihak berwenang. Batasi tipe dan ukuran berkas.
+- Tulis tes (Feature test) untuk aturan bisnis penting: wajib surat sakit, konfirmasi sebelum diproses, pembatasan akses wali murid, deteksi absen > 2 hari.
+- Tampilan harus responsif; wali murid terutama memakai ponsel.
 
-## Searching Documentation (IMPORTANT)
+## Keamanan dan Privasi
 
-- Use `search-docs` before changes that depend on Laravel ecosystem APIs, behavior, configuration, or version-specific syntax. Skip it for copy-only edits and other changes where package documentation is irrelevant. Reuse sufficient results already in context instead of searching again.
-- Pass a `packages` array to scope results when you know which packages are relevant.
-- Use multiple broad, topic-based queries: `['rate limiting', 'routing rate limiting', 'routing']`. Expect the most relevant results first.
-- Do not add package names to queries because package info is already shared. Use `test resource table`, not `filament 4 test resource table`.
+- Data siswa dan surat sakit adalah data pribadi sensitif.
+- **Jangan commit `.env`**, kunci API, kata sandi, atau token.
+- **Jangan masukkan data nyata** (nama siswa, nomor WhatsApp, surat sakit) ke repo, seeder, atau tes. Pakai data dummy.
+- Jangan menulis data sensitif ke log.
+- Lindungi semua form dengan CSRF dan semua route dengan autentikasi dan otorisasi.
 
-### Search Syntax
+## Alur Git (ringkas, lengkap di COLLABORATORS.md)
 
-1. Use words for auto-stemmed AND logic: `rate limit` matches both "rate" AND "limit".
-2. Use `"quoted phrases"` for exact position matching: `"infinite scroll"` requires adjacent words in order.
-3. Combine words and phrases for mixed queries: `middleware "rate limit"`.
-4. Use multiple queries for OR logic: `queries=["authentication", "middleware"]`.
+- Jangan push langsung ke `main`. Satu task = satu branch: `feature/<nama>-<task>` atau `fix/<nama>-<masalah>`.
+- Commit memakai awalan: `feat`, `fix`, `docs`, `refactor`, `chore`.
+- Judul PR: `Task N (FR-XX): <deskripsi>`; minimal 1 approval anggota lain; merge akhir oleh Rapik dengan Squash and merge.
+- Migrasi: jangan edit migrasi yang sudah ter-merge, buat migrasi baru. Beri tahu tim sebelum mengubah tabel bersama (`users`, `siswa`, `izin`).
+- Seeder role dimiliki Irul; jangan membuat definisi role sendiri di luar seeder tersebut.
 
-## Project Rules
+## Yang Tidak Boleh Dilakukan Agent
 
-- This project contains committed, area-grouped rules in `.ai/rules` when that directory exists, including path-scoped framework guidelines under `.ai/rules/boost`. Before you enter plan mode or create/edit any file, you MUST first: open @.ai/rules/index.md (it maps file globs to rule files), read every rule file whose globs cover the path(s) in scope, and run `grep -rin 'keyword' .ai/rules` to catch what a path match alone misses. Do not write code until you have read and are following every matching rule. If `.ai/rules` does not exist, continue without it.
+- Mengubah branch `main` secara langsung atau force push.
+- Menambah paket atau mengubah arsitektur tanpa persetujuan tim.
+- Mengubah aturan bisnis di atas tanpa konfirmasi ke pemilik task atau Rapik.
+- Mengarang data, endpoint, atau detail integrasi WhatsApp/fingerprint yang belum ditentukan. Jika belum jelas, tanyakan atau buat antarmuka (interface) dan implementasi tiruan (stub) yang jelas ditandai.
+- Menghapus atau menimpa pekerjaan anggota lain di luar lingkup task.
 
-## Artisan
+## Hal yang Belum Ditentukan
 
-- Run Artisan commands directly via the command line (e.g., `php artisan route:list`). Use `php artisan list` to discover available commands and `php artisan [command] --help` to check parameters.
-- Inspect routes with `php artisan route:list`. Filter with: `--method=GET`, `--name=users`, `--path=api`, `--except-vendor`, `--only-vendor`.
-- Read configuration values using dot notation: `php artisan config:show app.name`, `php artisan config:show database.default`. Or read config files directly from the `config/` directory.
+- Gateway WhatsApp yang dipakai dan cara autentikasinya (OTP atau tidak).
+- Format dan sumber data fingerprint (API, CSV, atau basis data).
+- Batas maksimal durasi izin per pengajuan, dan apakah izin susulan diperbolehkan.
+- Siapa yang berwenang memberi ACC selain guru piket.
+- Definisi "lebih dari 2 hari": hari kalender atau hari sekolah.
 
-## Tinker
-
-- Execute PHP in app context for debugging and testing code. Do not create models without user approval, prefer tests with factories instead. Prefer existing Artisan commands over custom tinker code.
-- Always use single quotes to prevent shell expansion: `php artisan tinker --execute 'Your::code();'`
-  - Double quotes for PHP strings inside: `php artisan tinker --execute 'User::where("active", true)->count();'`
-
-=== php rules ===
-
-# PHP
-
-- Always use curly braces for control structures, even for single-line bodies.
-- Use PHP 8 constructor property promotion: `public function __construct(public GitHub $github) { }`. Do not leave empty zero-parameter `__construct()` methods unless the constructor is private.
-- Use explicit return type declarations and type hints for all method parameters: `function isAccessible(User $user, ?string $path = null): bool`
-- Use TitleCase for Enum keys: `FavoritePerson`, `BestLake`, `Monthly`.
-- Prefer PHPDoc blocks over inline comments. Only add inline comments for exceptionally complex logic.
-- Use array shape type definitions in PHPDoc blocks.
-
-=== deployments rules ===
-
-# Deployment
-
-- Laravel can be deployed using [Laravel Cloud](https://cloud.laravel.com/), which is the fastest way to deploy and scale production Laravel applications.
-- Activate the `deploying-to-cloud` skill whenever deploying to Laravel Cloud, configuring Cloud environments or resources, using the Cloud CLI, or troubleshooting Cloud deployments.
-
-=== tests rules ===
-
-# Test Enforcement
-
-- Add or update tests for behavior and logic changes when a test provides meaningful regression coverage.
-- Pure copy, styling, and layout-only changes do not require new or updated tests.
-- When test coverage applies, run the affected tests and ensure they pass.
-- Test the changed behavior and its important failure modes, but do not add tests beyond them.
-- Read the `testing-best-practices` skill before writing tests.
-
-=== laravel/core rules ===
-
-# Do Things the Laravel Way
-
-- Use `php artisan make:` commands to create new files (i.e. migrations, controllers, models, etc.). You can list available Artisan commands using `php artisan list` and check their parameters with `php artisan [command] --help`.
-- If you're creating a generic PHP class, use `php artisan make:class`.
-- Pass `--no-interaction` to all Artisan commands to ensure they work without user input. You should also pass the correct `--options` to ensure correct behavior.
-
-### Model Creation
-
-- When creating new models, create useful factories and seeders for them too. Ask the user if they need any other things, using `php artisan make:model --help` to check the available options.
-
-## APIs & Eloquent Resources
-
-- For APIs, default to using Eloquent API Resources and API versioning unless existing API routes do not, then you should follow existing application convention.
-
-## URL Generation
-
-- When generating links to other pages, prefer named routes and the `route()` function.
-
-## Testing
-
-- When creating models for tests, use the factories for the models. Check if the factory has custom states that can be used before manually setting up the model.
-- Faker: Use methods such as `$this->faker->word()` or `fake()->randomDigit()`. Follow existing conventions whether to use `$this->faker` or `fake()`.
-- When creating tests, make use of `php artisan make:test [options] {name}` to create a feature test, and pass `--unit` to create a unit test. Most tests should be feature tests.
-
-=== pint/core rules ===
-
-# Laravel Pint Code Formatter
-
-- If you have modified any PHP files, you must run `vendor/bin/pint --dirty --format agent` before finalizing changes to ensure your code matches the project's expected style.
-- Do not run `vendor/bin/pint --test --format agent`, simply run `vendor/bin/pint --format agent` to fix any formatting issues.
-
-=== phpunit/core rules ===
-
-# PHPUnit
-
-- This project uses PHPUnit. Create tests with `php artisan make:test --phpunit {name}`.
-- Do not include the test suite directory in `{name}`. Use `SomeFeatureTest`, not `Feature/SomeFeatureTest`.
-- Read the `testing-best-practices` skill for guidance on coverage, naming, structure, dependency isolation, and review.
-
-## Running Tests
-
-- Run the narrowest set of tests that covers the change. Pass a file path or `--filter=testName` to `php artisan test --compact`.
-- Rerun a test after each change to it.
-- Run `vendor/bin/phpunit` to call the test runner directly. It accepts the same file path and `--filter=testName` arguments.
-
-</laravel-boost-guidelines>
+Untuk item di atas, jangan berasumsi: tanyakan, atau gunakan konfigurasi dan stub yang mudah diganti.
