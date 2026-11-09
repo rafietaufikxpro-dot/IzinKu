@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\IzinController;
+use App\Http\Controllers\IzinVerifikasiController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,12 @@ Route::middleware(['auth', 'role:wali_murid'])->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/izin/{izin}', [IzinController::class, 'show'])->name('izin.show');
     Route::get('/izin/{izin}/surat-sakit', [IzinController::class, 'downloadSuratSakit'])->name('izin.surat-sakit.download');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/verifikasi-izin', [IzinVerifikasiController::class, 'index'])->name('izin-verifikasi.index');
+    Route::get('/verifikasi-izin/{izin}', [IzinVerifikasiController::class, 'show'])->name('izin-verifikasi.show');
+    Route::post('/verifikasi-izin/{izin}/acc', [IzinVerifikasiController::class, 'acc'])->name('izin-verifikasi.acc');
 });
 
 require __DIR__.'/auth.php';

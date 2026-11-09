@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Izin;
 use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -57,11 +58,27 @@ class DummyDataSeeder extends Seeder
         );
         $wali->syncRoles('wali_murid');
 
-        Siswa::firstOrCreate(
+        $siswa = Siswa::firstOrCreate(
             ['nama' => 'Siswa Dummy'],
             [
                 'kelas' => 'XII RPL 1',
                 'user_id' => $wali->id,
+            ],
+        );
+
+        Izin::firstOrCreate(
+            [
+                'siswa_id' => $siswa->id,
+                'alasan' => 'izin',
+                'tanggal_mulai' => now()->toDateString(),
+            ],
+            [
+                'user_id' => $wali->id,
+                'tanggal_selesai' => now()->toDateString(),
+                'status' => 'menunggu',
+                'catatan' => 'Izin dummy untuk demo verifikasi.',
+                'confirmed_at' => now(),
+                'confirmed_by' => $wali->id,
             ],
         );
     }

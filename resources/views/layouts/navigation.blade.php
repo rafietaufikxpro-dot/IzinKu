@@ -21,6 +21,12 @@
                             {{ __('Pengajuan Izin') }}
                         </x-nav-link>
                     @endif
+
+                    @if (auth()->user()?->hasAnyRole(['guru', 'guru_piket', 'admin']))
+                        <x-nav-link :href="route('izin-verifikasi.index')" :active="request()->routeIs('izin-verifikasi.*')">
+                            {{ __('Verifikasi Izin') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -80,6 +86,12 @@
             @if (auth()->user()?->hasRole('wali_murid'))
                 <x-responsive-nav-link :href="route('izin.index')" :active="request()->routeIs('izin.*')">
                     {{ __('Pengajuan Izin') }}
+                </x-responsive-nav-link>
+            @endif
+
+            @if (auth()->user()?->hasAnyRole(['guru', 'guru_piket', 'admin']))
+                <x-responsive-nav-link :href="route('izin-verifikasi.index')" :active="request()->routeIs('izin-verifikasi.*')">
+                    {{ __('Verifikasi Izin') }}
                 </x-responsive-nav-link>
             @endif
         </div>

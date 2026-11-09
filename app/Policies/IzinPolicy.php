@@ -18,4 +18,20 @@ class IzinPolicy
 
         return $izin->user_id === $user->id;
     }
+
+    /**
+     * Tentukan apakah pengguna boleh melihat daftar izin.
+     */
+    public function viewAny(User $user): bool
+    {
+        return $user->hasRole(['guru', 'guru_piket', 'admin']);
+    }
+
+    /**
+     * Tentukan apakah pengguna boleh memberi ACC (persetujuan) izin.
+     */
+    public function acc(User $user, Izin $izin): bool
+    {
+        return $user->hasRole(config('izinku.role_pemberi_acc'));
+    }
 }

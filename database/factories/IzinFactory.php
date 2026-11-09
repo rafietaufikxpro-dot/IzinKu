@@ -37,4 +37,15 @@ class IzinFactory extends Factory
             'status_updated_by' => null,
         ];
     }
+
+    /**
+     * Indicate that the izin has been confirmed by the wali murid.
+     */
+    public function dikonfirmasi(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'confirmed_at' => now(),
+            'confirmed_by' => User::factory(),
+        ]);
+    }
 }
