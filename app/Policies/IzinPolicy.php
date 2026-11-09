@@ -32,6 +32,6 @@ class IzinPolicy
      */
     public function acc(User $user, Izin $izin): bool
     {
-        return $user->hasRole(config('izinku.role_pemberi_acc'));
+        return $user->hasRole(config('izin.role_pemberi_acc'));
     }
 }

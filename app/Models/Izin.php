@@ -3,42 +3,47 @@
 namespace App\Models;
 
 use Database\Factories\IzinFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable([
-    'siswa_id',
-    'user_id',
-    'alasan',
-    'tanggal_mulai',
-    'tanggal_selesai',
-    'surat_sakit_path',
-    'status',
-    'alasan_penolakan',
-    'catatan',
-    'confirmed_at',
-    'confirmed_by',
-    'status_updated_at',
-    'status_updated_by',
-])]
 class Izin extends Model
 {
-    protected $table = 'izin';
-
     /** @use HasFactory<IzinFactory> */
     use HasFactory;
 
     /**
-     * Status yang diperbolehkan.
+     * Nama tabel di database.
      *
-     * @var array<int, string>
+     * @var string
      */
-    public const STATUSES = ['menunggu', 'disetujui', 'ditolak'];
+    protected $table = 'izin';
 
     /**
-     * Get the attributes that should be cast.
+     * Atribut yang dapat diisi massal.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'user_id',
+        'siswa_id',
+        'jenis_izin',
+        'tanggal_mulai',
+        'tanggal_selesai',
+        'jumlah_hari',
+        'alasan',
+        'surat_sakit',
+        'status_konfirmasi',
+        'status',
+        'catatan_penolakan',
+        'diverifikasi_oleh',
+        'diverifikasi_pada',
+        'dikonfirmasi_oleh',
+        'dikonfirmasi_pada',
+    ];
+
+    /**
+     * Tipe casting atribut.
      *
      * @return array<string, string>
      */
@@ -47,32 +52,65 @@ class Izin extends Model
         return [
             'tanggal_mulai' => 'date',
             'tanggal_selesai' => 'date',
-            'confirmed_at' => 'datetime',
-            'status_updated_at' => 'datetime',
+            'jumlah_hari' => 'integer',
+            'diverifikasi_pada' => 'datetime',
+            'dikonfirmasi_pada' => 'datetime',
         ];
     }
 
     /**
-     * Siswa yang mengajukan izin.
+     * Relasi ke wali murid pemohon.
+     *
+     * @return BelongsTo<User, Izin>
      */
-    public function siswa(): BelongsTo
-    {
-        return $this->belongsTo(Siswa::class);
-    }
-
-    /**
-     * Wali murid yang mengajukan izin.
-     */
-    public function waliMurid(): BelongsTo
+    public function wali(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
-     * Pengguna yang terakhir mengubah status.
+     * Relasi ke siswa yang bersangkutan.
+     *
+     * @return BelongsTo<Siswa, Izin>
      */
-    public function pengubahStatus(): BelongsTo
+    public function siswa(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'status_updated_by');
+        return $this->belongsTo(Siswa::class, 'siswa_id');
+    }
+
+    /**
+     * Relasi ke guru piket yang memverifikasi.
+     *
+     * @return BelongsTo<User, Izin>
+     */
+    public function verifikator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'diverifikasi_oleh');
+    }
+
+    /**
+     * Relasi ke wali murid yang mengonfirmasi.
+     *
+     * @return BelongsTo<User, Izin>
+     */
+    public function pengonfirmasi(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dikonfirmasi_oleh');
+    }
+
+    /**
+     * Cek apakah jenis perizinan adalah sakit.
+     */
+    public function isSakit(): bool
+    {
+        return $this->jenis_izin === 'sakit';
+    }
+
+    /**
+     * Cek apakah status ACC masih menunggu.
+     */
+    public function isMenunggu(): bool
+    {
+        return $this->status === 'menunggu';
     }
 }

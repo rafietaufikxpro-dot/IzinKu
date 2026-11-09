@@ -18,7 +18,7 @@ class IzinVerifikasiService
      */
     public function accIzin(User $guru, Izin $izin, string $aksi, ?string $alasanPenolakan = null): Izin
     {
-        if ($izin->confirmed_at === null) {
+        if ($izin->status_konfirmasi !== 'dikonfirmasi') {
             throw ValidationException::withMessages([
                 'izin' => 'Izin belum dikonfirmasi oleh wali murid sehingga belum dapat diproses.',
             ]);
@@ -32,9 +32,9 @@ class IzinVerifikasiService
 
         $izin->update([
             'status' => $aksi,
-            'alasan_penolakan' => $aksi === 'ditolak' ? $alasanPenolakan : null,
-            'status_updated_at' => now(),
-            'status_updated_by' => $guru->id,
+            'catatan_penolakan' => $aksi === 'ditolak' ? $alasanPenolakan : null,
+            'diverifikasi_pada' => now(),
+            'diverifikasi_oleh' => $guru->id,
         ]);
 
         return $izin;

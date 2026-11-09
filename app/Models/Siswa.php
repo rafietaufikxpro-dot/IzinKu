@@ -3,33 +3,54 @@
 namespace App\Models;
 
 use Database\Factories\SiswaFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['nama', 'kelas', 'user_id'])]
 class Siswa extends Model
 {
-    protected $table = 'siswa';
-
     /** @use HasFactory<SiswaFactory> */
     use HasFactory;
 
     /**
-     * Wali murid yang memiliki siswa ini.
+     * Nama tabel di database.
+     *
+     * @var string
      */
-    public function waliMurid(): BelongsTo
+    protected $table = 'siswa';
+
+    /**
+     * Atribut yang dapat diisi massal.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'user_id',
+        'nis',
+        'nisn',
+        'nama',
+        'kelas',
+        'jenis_kelamin',
+    ];
+
+    /**
+     * Relasi ke wali murid (User).
+     *
+     * @return BelongsTo<User, Siswa>
+     */
+    public function wali(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
-     * Riwayat izin siswa.
+     * Relasi ke riwayat perizinan siswa.
+     *
+     * @return HasMany<Izin>
      */
-    public function izin(): HasMany
+    public function izins(): HasMany
     {
-        return $this->hasMany(Izin::class);
+        return $this->hasMany(Izin::class, 'siswa_id');
     }
 }
